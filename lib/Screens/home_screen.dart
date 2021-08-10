@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -21,16 +23,25 @@ class HomeScreen extends StatelessWidget {
         height: mediaQuery.height,
         width: mediaQuery.width,
         color: Colors.white,
-        child: const Center(
-          child: Text("Drawing"),
-        ),
+        child: const CustomPaint(),
       ),
       bottomNavigationBar: BottomAppBar(
-        elevation: 10,
+        elevation: 15,
         child: Container(
-          padding: const EdgeInsets.all(8),
+          padding: const EdgeInsets.symmetric(
+            vertical: 30,
+            horizontal: 8,
+          ),
           decoration: BoxDecoration(
-            color: Colors.pinkAccent.withOpacity(0.3),
+            color: Colors.brown.withOpacity(0.4),
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(30),
+              topRight: Radius.circular(30),
+            ),
+            border: Border.all(
+              color: Colors.blueGrey,
+              width: 1.5,
+            ),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -44,6 +55,48 @@ class HomeScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class PaintModel {
+  final Offset modelOffset;
+  final Paint modelPaint;
+
+  PaintModel({
+    required this.modelOffset,
+    required this.modelPaint,
+  });
+}
+
+class Painter extends CustomPainter {
+  final List<PaintModel> pointsList;
+
+  Painter(this.pointsList);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    for (int i = 0; i < pointsList.length - 1; i++) {
+      if (pointsList[i] != null && pointsList[i + 1] != null) {
+        canvas.drawLine(
+          pointsList[i].modelOffset,
+          pointsList[i + 1].modelOffset,
+          pointsList[i].modelPaint,
+        );
+      } else if (pointsList[i] != null && pointsList[i + 1] == null) {
+        List<Offset> listOfOffset = [];
+        listOfOffset.add(pointsList[i].modelOffset);
+        canvas.drawPoints(
+          PointMode.points,
+          listOfOffset,
+          pointsList[i].modelPaint,
+        );
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return true;
   }
 }
 
