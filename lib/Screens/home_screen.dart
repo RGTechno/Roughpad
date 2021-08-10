@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
@@ -21,7 +22,8 @@ class _HomeScreenState extends State<HomeScreen> {
     Colors.cyan,
   ];
 
-  Color selectedColor = Colors.black;
+  Color selectedColor = Colors.blue;
+  Color animColor = Colors.transparent;
 
   List<PaintModel?> points = [];
   final paintStream = BehaviorSubject<List<PaintModel?>>();
@@ -79,9 +81,14 @@ class _HomeScreenState extends State<HomeScreen> {
               child: StreamBuilder<List<PaintModel?>>(
                 stream: paintStream.stream,
                 builder: (context, snapshot) {
-                  return CustomPaint(
-                    painter: Painter(
-                      (snapshot.data ?? []),
+                  return AnimatedContainer(
+                    duration: const Duration(milliseconds: 10000),
+                    color: Colors.transparent,
+                    curve: Curves.bounceOut,
+                    child: CustomPaint(
+                      painter: Painter(
+                        (snapshot.data ?? []),
+                      ),
                     ),
                   );
                 },
@@ -89,30 +96,60 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             Positioned(
               top: mediaQuery.height * 0.1,
-              left: mediaQuery.width * 0.25,
-              child: Center(
-                child: ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      points = [];
-                    });
-                    paintStream.add(points);
-                  },
-                  style: ButtonStyle(
-                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                      RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15),
+              left: mediaQuery.width * 0.05,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        points = [];
+                      });
+                      paintStream.add(points);
+                    },
+                    style: ButtonStyle(
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                        RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                      ),
+                      padding: MaterialStateProperty.all<EdgeInsets>(
+                        EdgeInsets.symmetric(
+                          horizontal: mediaQuery.width * 0.1,
+                          vertical: 5,
+                        ),
                       ),
                     ),
-                    padding: MaterialStateProperty.all<EdgeInsets>(
-                      EdgeInsets.symmetric(
-                        horizontal: mediaQuery.width * 0.2,
-                        vertical: 5,
-                      ),
-                    ),
+                    child: const Text("Reset"),
                   ),
-                  child: const Text("Reset"),
-                ),
+                  // const SizedBox(width: 10),
+                  // ElevatedButton(
+                  //   onPressed: () {
+                  //     // setState(() {
+                  //     //   animColor = Colors.brown.withOpacity(0.4);
+                  //     // });
+                  //     // Timer(const Duration(milliseconds: 10000), () {
+                  //     //   setState(() {
+                  //     //     animColor = Colors.transparent;
+                  //     //   });
+                  //     // });
+                  //   },
+                  //   style: ButtonStyle(
+                  //     shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                  //       RoundedRectangleBorder(
+                  //         borderRadius: BorderRadius.circular(15),
+                  //       ),
+                  //     ),
+                  //     padding: MaterialStateProperty.all<EdgeInsets>(
+                  //       EdgeInsets.symmetric(
+                  //         horizontal: mediaQuery.width * 0.1,
+                  //         vertical: 5,
+                  //       ),
+                  //     ),
+                  //   ),
+                  //   child: const Text("Animate"),
+                  // ),
+                ],
               ),
             ),
           ],
@@ -158,7 +195,7 @@ class _HomeScreenState extends State<HomeScreen> {
       },
       child: CircleAvatar(
         backgroundColor: color,
-        radius: isSelected ? 25 : 20,
+        radius: isSelected ? 30 : 20,
       ),
     );
   }
