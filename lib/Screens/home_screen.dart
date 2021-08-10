@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
@@ -29,14 +28,50 @@ class _HomeScreenState extends State<HomeScreen> {
   final paintStream = BehaviorSubject<List<PaintModel?>>();
 
   @override
+  void dispose() {
+    paintStream.close();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context).size;
+
+    bool showColors = false;
 
     final scaffoldKey = GlobalKey();
 
     return Scaffold(
       key: scaffoldKey,
       body: GestureDetector(
+        onDoubleTap: () {
+          showDialog(
+              context: context,
+              builder: (BuildContext ctx) {
+                return AlertDialog(
+                  title: const Text("Clear"),
+                  content: const Text("Do you want to clear the board?"),
+                  actions: [
+                    TextButton(
+                      child: const Text("Yes"),
+                      onPressed: () {
+                        setState(() {
+                          points = [];
+                        });
+                        paintStream.add(points);
+                        Navigator.of(ctx).pop();
+                      },
+                    ),
+                    TextButton(
+                      child: const Text("No"),
+                      onPressed: () {
+                        Navigator.of(ctx).pop();
+                      },
+                    ),
+                  ],
+                );
+              });
+        },
         onPanStart: (details) {
           Paint paint = Paint();
           paint.color = selectedColor;
@@ -71,90 +106,29 @@ class _HomeScreenState extends State<HomeScreen> {
           points.add(null);
           paintStream.add(points);
         },
-        child: Stack(
-          children: [
-            Container(
-              height: mediaQuery.height,
-              width: mediaQuery.width,
-              color: Colors.white,
-              // ignore: deprecated_member_use
-              child: StreamBuilder<List<PaintModel?>>(
-                stream: paintStream.stream,
-                builder: (context, snapshot) {
-                  return AnimatedContainer(
-                    duration: const Duration(milliseconds: 10000),
-                    color: Colors.transparent,
-                    curve: Curves.bounceOut,
-                    child: CustomPaint(
-                      painter: Painter(
-                        (snapshot.data ?? []),
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-            Positioned(
-              top: mediaQuery.height * 0.1,
-              left: mediaQuery.width * 0.05,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        points = [];
-                      });
-                      paintStream.add(points);
-                    },
-                    style: ButtonStyle(
-                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                        RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                      ),
-                      padding: MaterialStateProperty.all<EdgeInsets>(
-                        EdgeInsets.symmetric(
-                          horizontal: mediaQuery.width * 0.1,
-                          vertical: 5,
-                        ),
-                      ),
-                    ),
-                    child: const Text("Reset"),
+        child: Container(
+          height: mediaQuery.height,
+          width: mediaQuery.width,
+          color: Colors.white,
+          // ignore: deprecated_member_use
+          child: StreamBuilder<List<PaintModel?>>(
+            stream: paintStream.stream,
+            builder: (context, snapshot) {
+              return AnimatedContainer(
+                duration: const Duration(milliseconds: 10000),
+                color: Colors.transparent,
+                curve: Curves.bounceOut,
+                child: CustomPaint(
+                  painter: Painter(
+                    (snapshot.data ?? []),
                   ),
-                  // const SizedBox(width: 10),
-                  // ElevatedButton(
-                  //   onPressed: () {
-                  //     // setState(() {
-                  //     //   animColor = Colors.brown.withOpacity(0.4);
-                  //     // });
-                  //     // Timer(const Duration(milliseconds: 10000), () {
-                  //     //   setState(() {
-                  //     //     animColor = Colors.transparent;
-                  //     //   });
-                  //     // });
-                  //   },
-                  //   style: ButtonStyle(
-                  //     shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                  //       RoundedRectangleBorder(
-                  //         borderRadius: BorderRadius.circular(15),
-                  //       ),
-                  //     ),
-                  //     padding: MaterialStateProperty.all<EdgeInsets>(
-                  //       EdgeInsets.symmetric(
-                  //         horizontal: mediaQuery.width * 0.1,
-                  //         vertical: 5,
-                  //       ),
-                  //     ),
-                  //   ),
-                  //   child: const Text("Animate"),
-                  // ),
-                ],
-              ),
-            ),
-          ],
+                ),
+              );
+            },
+          ),
         ),
       ),
+
       bottomNavigationBar: BottomAppBar(
         elevation: 15,
         child: Container(
@@ -175,13 +149,40 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: List.generate(
-              colors.length,
-              (index) => colorPicker(colors[index]),
-            ),
+            children: [
+              ...List.generate(
+                colors.length,
+                (index) => colorPicker(colors[index]),
+              ),
+              // IconButton(
+              //   onPressed: () {},
+              //   icon: const Icon(
+              //     Icons.cancel_outlined,
+              //     size: 30,
+              //   ),
+              // )
+            ],
           ),
         ),
       ),
+      // floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      // floatingActionButton: FloatingActionBubble(
+      //   backGroundColor: Colors.brown.withOpacity(0.4),
+      //   items: List.generate(
+      //     colors.length,
+      //     (index) => Bubble(
+      //         title: "",
+      //         titleStyle: const TextStyle(fontSize: 16, color: Colors.white),
+      //         iconColor: colors[index],
+      //         bubbleColor: colors[index],
+      //         icon: Icons.circle,
+      //         onPress: () {
+      //           setState(() {
+      //             selectedColor = colors[index];
+      //           });
+      //         }),
+      //   ),
+      // ),
     );
   }
 
