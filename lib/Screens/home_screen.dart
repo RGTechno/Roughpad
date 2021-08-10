@@ -21,13 +21,14 @@ class _HomeScreenState extends State<HomeScreen> {
     Colors.cyan,
   ];
 
+  Color selectedColor = Colors.black;
+
+  List<PaintModel?> points = [];
+  final paintStream = BehaviorSubject<List<PaintModel?>>();
+
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context).size;
-
-    List<PaintModel?> points = [];
-
-    final paintStream = BehaviorSubject<List<PaintModel?>>();
 
     final scaffoldKey = GlobalKey();
 
@@ -36,7 +37,7 @@ class _HomeScreenState extends State<HomeScreen> {
       body: GestureDetector(
         onPanStart: (details) {
           Paint paint = Paint();
-          paint.color = Colors.red;
+          paint.color = selectedColor;
           paint.strokeWidth = 2;
           paint.strokeCap = StrokeCap.round;
 
@@ -51,7 +52,7 @@ class _HomeScreenState extends State<HomeScreen> {
         },
         onPanUpdate: (details) {
           Paint paint = Paint();
-          paint.color = Colors.red;
+          paint.color = selectedColor;
           paint.strokeWidth = 2;
           paint.strokeCap = StrokeCap.round;
 
@@ -95,6 +96,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     setState(() {
                       points = [];
                     });
+                    paintStream.add(points);
                   },
                   style: ButtonStyle(
                     shape: MaterialStateProperty.all<RoundedRectangleBorder>(
@@ -119,8 +121,8 @@ class _HomeScreenState extends State<HomeScreen> {
       bottomNavigationBar: BottomAppBar(
         elevation: 15,
         child: Container(
-          padding: const EdgeInsets.symmetric(
-            vertical: 30,
+          padding: EdgeInsets.symmetric(
+            vertical: mediaQuery.height * 0.03,
             horizontal: 8,
           ),
           decoration: BoxDecoration(
@@ -138,12 +140,25 @@ class _HomeScreenState extends State<HomeScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: List.generate(
               colors.length,
-              (index) => ColorPicker(
-                color: colors[index],
-              ),
+              (index) => colorPicker(colors[index]),
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget colorPicker(Color color) {
+    bool isSelected = selectedColor == color;
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          selectedColor = color;
+        });
+      },
+      child: CircleAvatar(
+        backgroundColor: color,
+        radius: isSelected ? 25 : 20,
       ),
     );
   }
@@ -188,22 +203,5 @@ class Painter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
     return true;
-  }
-}
-
-class ColorPicker extends StatelessWidget {
-  final Color color;
-
-  const ColorPicker({
-    Key? key,
-    required this.color,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return CircleAvatar(
-      backgroundColor: color,
-      radius: 20,
-    );
   }
 }
