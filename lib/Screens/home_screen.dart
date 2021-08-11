@@ -1,8 +1,13 @@
+import 'dart:typed_data';
+import 'dart:ui' as ui;
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:image_gallery_saver/image_gallery_saver.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:rxdart/rxdart.dart';
 
 // ignore: use_key_in_widget_constructors
@@ -36,98 +41,129 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
+  final scaffoldKey = GlobalKey();
+
+  Future<void> saveImage() async {
+    RenderRepaintBoundary canvas = scaffoldKey.currentContext!
+        .findRenderObject()! as RenderRepaintBoundary;
+    ui.Image canvasImage = await canvas.toImage();
+    ByteData? ciByteData =
+        await canvasImage.toByteData(format: ui.ImageByteFormat.png);
+    Uint8List canvasPng = ciByteData!.buffer.asUint8List();
+
+    if (!(await Permission.storage.status.isGranted)) {
+      await Permission.storage.request();
+    }
+    final imageSaved = await ImageGallerySaver.saveImage(
+      Uint8List.fromList(canvasPng),
+      name: "Roughwork",
+    );
+    print(imageSaved);
+  }
+
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context).size;
 
     bool showColors = false;
 
-    final scaffoldKey = GlobalKey();
-
     return Scaffold(
-      key: scaffoldKey,
-      body: GestureDetector(
-        onDoubleTap: () {
-          showDialog(
-              context: context,
-              builder: (BuildContext ctx) {
-                return AlertDialog(
-                  title: const Text("Clear"),
-                  content: const Text("Do you want to clear the board?"),
-                  actions: [
-                    TextButton(
-                      child: const Text("Yes"),
-                      onPressed: () {
-                        setState(() {
-                          points = [];
-                        });
-                        paintStream.add(points);
-                        Navigator.of(ctx).pop();
-                      },
+      appBar: AppBar(
+        title: const Text(
+          "Roughpad",
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.save_outlined),
+            onPressed: saveImage,
+          )
+        ],
+      ),
+      body: RepaintBoundary(
+        key: scaffoldKey,
+        child: GestureDetector(
+          onDoubleTap: () {
+            showDialog(
+                context: context,
+                builder: (BuildContext ctx) {
+                  return AlertDialog(
+                    title: const Text("Clear"),
+                    content: const Text("Do you want to clear the board?"),
+                    actions: [
+                      TextButton(
+                        child: const Text("Yes"),
+                        onPressed: () {
+                          setState(() {
+                            points = [];
+                          });
+                          paintStream.add(points);
+                          Navigator.of(ctx).pop();
+                        },
+                      ),
+                      TextButton(
+                        child: const Text("No"),
+                        onPressed: () {
+                          Navigator.of(ctx).pop();
+                        },
+                      ),
+                    ],
+                  );
+                });
+          },
+          onPanStart: (details) {
+            Paint paint = Paint();
+            paint.color = selectedColor;
+            paint.strokeWidth = 2;
+            paint.strokeCap = StrokeCap.round;
+
+            points.add(
+              PaintModel(
+                modelOffset: details.localPosition,
+                modelPaint: paint,
+              ),
+            );
+
+            paintStream.add(points);
+          },
+          onPanUpdate: (details) {
+            Paint paint = Paint();
+            paint.color = selectedColor;
+            paint.strokeWidth = 2;
+            paint.strokeCap = StrokeCap.round;
+
+            points.add(
+              PaintModel(
+                modelOffset: details.localPosition,
+                modelPaint: paint,
+              ),
+            );
+
+            paintStream.add(points);
+          },
+          onPanEnd: (details) {
+            points.add(null);
+            paintStream.add(points);
+          },
+          child: Container(
+            height: mediaQuery.height,
+            width: mediaQuery.width,
+            color: Colors.white,
+            // ignore: deprecated_member_use
+            child: StreamBuilder<List<PaintModel?>>(
+              stream: paintStream.stream,
+              builder: (context, snapshot) {
+                return AnimatedContainer(
+                  duration: const Duration(milliseconds: 10000),
+                  color: Colors.transparent,
+                  curve: Curves.bounceOut,
+                  child: CustomPaint(
+                    painter: Painter(
+                      (snapshot.data ?? []),
                     ),
-                    TextButton(
-                      child: const Text("No"),
-                      onPressed: () {
-                        Navigator.of(ctx).pop();
-                      },
-                    ),
-                  ],
-                );
-              });
-        },
-        onPanStart: (details) {
-          Paint paint = Paint();
-          paint.color = selectedColor;
-          paint.strokeWidth = 2;
-          paint.strokeCap = StrokeCap.round;
-
-          points.add(
-            PaintModel(
-              modelOffset: details.localPosition,
-              modelPaint: paint,
-            ),
-          );
-
-          paintStream.add(points);
-        },
-        onPanUpdate: (details) {
-          Paint paint = Paint();
-          paint.color = selectedColor;
-          paint.strokeWidth = 2;
-          paint.strokeCap = StrokeCap.round;
-
-          points.add(
-            PaintModel(
-              modelOffset: details.localPosition,
-              modelPaint: paint,
-            ),
-          );
-
-          paintStream.add(points);
-        },
-        onPanEnd: (details) {
-          points.add(null);
-          paintStream.add(points);
-        },
-        child: Container(
-          height: mediaQuery.height,
-          width: mediaQuery.width,
-          color: Colors.white,
-          // ignore: deprecated_member_use
-          child: StreamBuilder<List<PaintModel?>>(
-            stream: paintStream.stream,
-            builder: (context, snapshot) {
-              return AnimatedContainer(
-                duration: const Duration(milliseconds: 10000),
-                color: Colors.transparent,
-                curve: Curves.bounceOut,
-                child: CustomPaint(
-                  painter: Painter(
-                    (snapshot.data ?? []),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
         ),
       ),
