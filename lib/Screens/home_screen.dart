@@ -1,11 +1,14 @@
 import 'dart:typed_data';
 import 'dart:ui' as ui;
-import 'dart:ui';
 
+import 'package:custom_painter_roughpad/Widgets/painter.dart';
+import 'package:custom_painter_roughpad/Widgets/paintmodel.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:rxdart/rxdart.dart';
@@ -58,58 +61,110 @@ class _HomeScreenState extends State<HomeScreen> {
       Uint8List.fromList(canvasPng),
       name: "Roughwork",
     );
-    print(imageSaved);
+    showDialog(
+        context: context,
+        builder: (BuildContext ctx) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(25),
+            ),
+            title: Text(
+              "Image Saved",
+              style: GoogleFonts.gafata(),
+            ),
+            content: Text(
+              "Image Saved Successfully!!",
+              style: GoogleFonts.gafata(),
+            ),
+            actions: [
+              TextButton(
+                child: Text(
+                  "OK",
+                  style: GoogleFonts.gafata(),
+                ),
+                onPressed: () {
+                  Navigator.of(ctx).pop();
+                },
+              ),
+            ],
+          );
+        });
+  }
+
+  clearScreen() {
+    showDialog(
+        context: context,
+        builder: (BuildContext ctx) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(25),
+            ),
+            title: Text(
+              "Clear",
+              style: GoogleFonts.gafata(),
+            ),
+            content: Text(
+              "Do you want to clear the board?",
+              style: GoogleFonts.gafata(),
+            ),
+            actions: [
+              TextButton(
+                child: Text(
+                  "Yes",
+                  style: GoogleFonts.gafata(),
+                ),
+                onPressed: () {
+                  setState(() {
+                    points = [];
+                  });
+                  paintStream.add(points);
+                  Navigator.of(ctx).pop();
+                },
+              ),
+              TextButton(
+                child: Text(
+                  "No",
+                  style: GoogleFonts.gafata(),
+                ),
+                onPressed: () {
+                  Navigator.of(ctx).pop();
+                },
+              ),
+            ],
+          );
+        });
   }
 
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context).size;
 
-    bool showColors = false;
-
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           "Roughpad",
+          style: GoogleFonts.arizonia(
+            fontSize: 35,
+            fontWeight: FontWeight.bold,
+          ),
         ),
+        elevation: 0,
+        backgroundColor: Colors.white,
         actions: [
           IconButton(
             icon: const Icon(Icons.save_outlined),
             onPressed: saveImage,
+          ),
+          IconButton(
+            icon: const Icon(Icons.cancel_outlined),
+            onPressed: clearScreen,
           )
         ],
       ),
       body: RepaintBoundary(
         key: scaffoldKey,
         child: GestureDetector(
-          onDoubleTap: () {
-            showDialog(
-                context: context,
-                builder: (BuildContext ctx) {
-                  return AlertDialog(
-                    title: const Text("Clear"),
-                    content: const Text("Do you want to clear the board?"),
-                    actions: [
-                      TextButton(
-                        child: const Text("Yes"),
-                        onPressed: () {
-                          setState(() {
-                            points = [];
-                          });
-                          paintStream.add(points);
-                          Navigator.of(ctx).pop();
-                        },
-                      ),
-                      TextButton(
-                        child: const Text("No"),
-                        onPressed: () {
-                          Navigator.of(ctx).pop();
-                        },
-                      ),
-                    ],
-                  );
-                });
-          },
+          onDoubleTap: clearScreen,
           onPanStart: (details) {
             Paint paint = Paint();
             paint.color = selectedColor;
@@ -167,7 +222,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
-
       floatingActionButton: FloatingActionButton(
         backgroundColor: selectedColor,
         onPressed: () {
@@ -175,7 +229,13 @@ class _HomeScreenState extends State<HomeScreen> {
               context: context,
               builder: (BuildContext cntx) {
                 return AlertDialog(
-                  title: const Text("Pick A Color"),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(25),
+                  ),
+                  title: Text(
+                    "Pick A Color",
+                    style: GoogleFonts.gafata(),
+                  ),
                   content: SingleChildScrollView(
                     child: ColorPicker(
                       pickerColor: pickerColor,
@@ -196,107 +256,16 @@ class _HomeScreenState extends State<HomeScreen> {
                         });
                         Navigator.of(cntx).pop();
                       },
-                      child: const Text("Done"),
+                      child: Text(
+                        "Done",
+                        style: GoogleFonts.gafata(),
+                      ),
                     ),
                   ],
                 );
               });
         },
       ),
-
-      // bottomNavigationBar: BottomAppBar(
-      //   elevation: 15,
-      //   child: Container(
-      //     padding: EdgeInsets.symmetric(
-      //       vertical: mediaQuery.height * 0.03,
-      //       horizontal: 8,
-      //     ),
-      //     decoration: BoxDecoration(
-      //       color: Colors.brown.withOpacity(0.4),
-      //       borderRadius: const BorderRadius.only(
-      //         topLeft: Radius.circular(30),
-      //         topRight: Radius.circular(30),
-      //       ),
-      //       border: Border.all(
-      //         color: Colors.blueGrey,
-      //         width: 1.5,
-      //       ),
-      //     ),
-      //     child: Row(
-      //       mainAxisAlignment: MainAxisAlignment.spaceAround,
-      //       children: [
-      //         ...List.generate(
-      //           colors.length,
-      //           (index) => colorPicker(colors[index]),
-      //         ),
-      //         // IconButton(
-      //         //   onPressed: () {},
-      //         //   icon: const Icon(
-      //         //     Icons.cancel_outlined,
-      //         //     size: 30,
-      //         //   ),
-      //         // )
-      //       ],
-      //     ),
-      //   ),
-      // ),
     );
-  }
-
-  Widget colorPicker(Color color) {
-    bool isSelected = selectedColor == color;
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          selectedColor = color;
-        });
-      },
-      child: CircleAvatar(
-        backgroundColor: color,
-        radius: isSelected ? 30 : 20,
-      ),
-    );
-  }
-}
-
-class PaintModel {
-  final Offset modelOffset;
-  final Paint modelPaint;
-
-  PaintModel({
-    required this.modelOffset,
-    required this.modelPaint,
-  });
-}
-
-class Painter extends CustomPainter {
-  final List<PaintModel?> pointsList;
-
-  Painter(this.pointsList);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    for (int i = 0; i < pointsList.length - 1; i++) {
-      if (pointsList[i] != null && pointsList[i + 1] != null) {
-        canvas.drawLine(
-          pointsList[i]!.modelOffset,
-          pointsList[i + 1]!.modelOffset,
-          pointsList[i]!.modelPaint,
-        );
-      } else if (pointsList[i] != null && pointsList[i + 1] == null) {
-        List<Offset> listOfOffset = [];
-        listOfOffset.add(pointsList[i]!.modelOffset);
-        canvas.drawPoints(
-          PointMode.points,
-          listOfOffset,
-          pointsList[i]!.modelPaint,
-        );
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return true;
   }
 }

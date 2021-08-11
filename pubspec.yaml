@@ -38,6 +38,7 @@ dependencies:
   image_gallery_saver: ^1.6.9
   permission_handler: ^8.1.4+2
   flutter_colorpicker: ^0.5.0
+  google_fonts: ^2.1.0
 
 dev_dependencies:
   flutter_test:
