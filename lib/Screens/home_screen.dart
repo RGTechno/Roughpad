@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 import 'dart:ui' as ui;
-
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:custom_painter_roughpad/Widgets/painter.dart';
 import 'package:custom_painter_roughpad/Widgets/paintmodel.dart';
 import 'package:flutter/cupertino.dart';
@@ -151,10 +151,12 @@ class _HomeScreenState extends State<HomeScreen> {
         elevation: 0,
         backgroundColor: Colors.white,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.save_outlined),
-            onPressed: saveImage,
-          ),
+          kIsWeb
+              ? Container()
+              : IconButton(
+                  icon: const Icon(Icons.save_outlined),
+                  onPressed: saveImage,
+                ),
           IconButton(
             icon: const Icon(Icons.cancel_outlined),
             onPressed: clearScreen,
