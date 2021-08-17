@@ -1,9 +1,10 @@
 import 'dart:typed_data';
 import 'dart:ui' as ui;
-import 'package:flutter/foundation.dart' show kIsWeb;
+
 import 'package:custom_painter_roughpad/Widgets/painter.dart';
 import 'package:custom_painter_roughpad/Widgets/paintmodel.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
@@ -32,6 +33,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Color selectedColor = Colors.blue;
   Color pickerColor = Colors.blue;
+  double selectedStrokeWidth = 2;
 
   Color animColor = Colors.transparent;
 
@@ -170,7 +172,7 @@ class _HomeScreenState extends State<HomeScreen> {
           onPanStart: (details) {
             Paint paint = Paint();
             paint.color = selectedColor;
-            paint.strokeWidth = 2;
+            paint.strokeWidth = selectedStrokeWidth;
             paint.strokeCap = StrokeCap.round;
 
             points.add(
@@ -185,7 +187,7 @@ class _HomeScreenState extends State<HomeScreen> {
           onPanUpdate: (details) {
             Paint paint = Paint();
             paint.color = selectedColor;
-            paint.strokeWidth = 2;
+            paint.strokeWidth = selectedStrokeWidth;
             paint.strokeCap = StrokeCap.round;
 
             points.add(
@@ -201,26 +203,46 @@ class _HomeScreenState extends State<HomeScreen> {
             points.add(null);
             paintStream.add(points);
           },
-          child: Container(
-            height: mediaQuery.height,
-            width: mediaQuery.width,
-            color: Colors.white,
-            // ignore: deprecated_member_use
-            child: StreamBuilder<List<PaintModel?>>(
-              stream: paintStream.stream,
-              builder: (context, snapshot) {
-                return AnimatedContainer(
-                  duration: const Duration(milliseconds: 10000),
-                  color: Colors.transparent,
-                  curve: Curves.bounceOut,
-                  child: CustomPaint(
-                    painter: Painter(
-                      (snapshot.data ?? []),
-                    ),
-                  ),
-                );
-              },
-            ),
+          child: Stack(
+            children: [
+              Container(
+                height: mediaQuery.height,
+                width: mediaQuery.width,
+                color: Colors.white,
+                // ignore: deprecated_member_use
+                child: StreamBuilder<List<PaintModel?>>(
+                  stream: paintStream.stream,
+                  builder: (context, snapshot) {
+                    return AnimatedContainer(
+                      duration: const Duration(milliseconds: 10000),
+                      color: Colors.transparent,
+                      curve: Curves.bounceOut,
+                      child: CustomPaint(
+                        painter: Painter(
+                          (snapshot.data ?? []),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              Positioned(
+                top: 0,
+                right: 0,
+                child: Slider(
+                  activeColor: selectedColor,
+                  value: selectedStrokeWidth,
+                  onChanged: (value) {
+                    setState(() {
+                      selectedStrokeWidth = value;
+                    });
+                    // print(value);
+                  },
+                  min: 2,
+                  max: 20,
+                ),
+              ),
+            ],
           ),
         ),
       ),
