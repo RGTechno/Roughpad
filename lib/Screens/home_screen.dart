@@ -13,6 +13,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 // ignore: use_key_in_widget_constructors
 class HomeScreen extends StatefulWidget {
@@ -166,7 +167,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 eraser = !eraser;
               });
             },
-            icon: !eraser ? Icon(Icons.earbuds_battery) : Icon(Icons.brush),
+            icon: !eraser ? FaIcon(FontAwesomeIcons.eraser) : Icon(Icons.brush),
           ),
           IconButton(
             icon: const Icon(Icons.cancel_outlined),
@@ -253,9 +254,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 top: 0,
                 right: 0,
                 child: Slider(
-                  label: "Brush Size",
+                  label: "$selectedStrokeWidth",
                   activeColor: selectedColor,
                   value: selectedStrokeWidth,
+                  divisions: 16,
                   onChanged: (value) {
                     setState(() {
                       selectedStrokeWidth = value;
@@ -263,7 +265,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     // print(value);
                   },
                   min: 2,
-                  max: 20,
+                  max: 50,
                 ),
               ),
             ],
