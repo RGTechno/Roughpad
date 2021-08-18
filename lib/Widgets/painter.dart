@@ -10,6 +10,10 @@ class Painter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    canvas.saveLayer(
+      Rect.fromLTWH(0, 0, size.width, size.height),
+      Paint(),
+    );
     for (int i = 0; i < pointsList.length - 1; i++) {
       if (pointsList[i] != null && pointsList[i + 1] != null) {
         canvas.drawLine(
@@ -27,6 +31,7 @@ class Painter extends CustomPainter {
         );
       }
     }
+    canvas.restore();
   }
 
   @override

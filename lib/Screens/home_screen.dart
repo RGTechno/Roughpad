@@ -34,6 +34,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Color selectedColor = Colors.blue;
   Color pickerColor = Colors.blue;
   double selectedStrokeWidth = 2;
+  bool eraser = false;
 
   Color animColor = Colors.transparent;
 
@@ -160,6 +161,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   onPressed: saveImage,
                 ),
           IconButton(
+            onPressed: () {
+              setState(() {
+                eraser = !eraser;
+              });
+            },
+            icon: !eraser ? Icon(Icons.earbuds_battery) : Icon(Icons.brush),
+          ),
+          IconButton(
             icon: const Icon(Icons.cancel_outlined),
             onPressed: clearScreen,
           )
@@ -171,9 +180,16 @@ class _HomeScreenState extends State<HomeScreen> {
           onDoubleTap: clearScreen,
           onPanStart: (details) {
             Paint paint = Paint();
-            paint.color = selectedColor;
-            paint.strokeWidth = selectedStrokeWidth;
-            paint.strokeCap = StrokeCap.round;
+            if (eraser) {
+              paint.color = Colors.white;
+              paint.blendMode = BlendMode.clear;
+              paint.strokeWidth = selectedStrokeWidth;
+              paint.strokeCap = StrokeCap.round;
+            } else {
+              paint.color = selectedColor;
+              paint.strokeWidth = selectedStrokeWidth;
+              paint.strokeCap = StrokeCap.round;
+            }
 
             points.add(
               PaintModel(
@@ -186,9 +202,16 @@ class _HomeScreenState extends State<HomeScreen> {
           },
           onPanUpdate: (details) {
             Paint paint = Paint();
-            paint.color = selectedColor;
-            paint.strokeWidth = selectedStrokeWidth;
-            paint.strokeCap = StrokeCap.round;
+            if (eraser) {
+              paint.color = Colors.white;
+              paint.blendMode = BlendMode.clear;
+              paint.strokeWidth = selectedStrokeWidth;
+              paint.strokeCap = StrokeCap.round;
+            } else {
+              paint.color = selectedColor;
+              paint.strokeWidth = selectedStrokeWidth;
+              paint.strokeCap = StrokeCap.round;
+            }
 
             points.add(
               PaintModel(
@@ -230,6 +253,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 top: 0,
                 right: 0,
                 child: Slider(
+                  label: "Brush Size",
                   activeColor: selectedColor,
                   value: selectedStrokeWidth,
                   onChanged: (value) {
@@ -247,6 +271,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
+        tooltip: "Color Picker",
         backgroundColor: selectedColor,
         onPressed: () {
           showDialog(
