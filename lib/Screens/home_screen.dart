@@ -9,11 +9,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 // ignore: use_key_in_widget_constructors
 class HomeScreen extends StatefulWidget {
@@ -167,12 +167,22 @@ class _HomeScreenState extends State<HomeScreen> {
                 eraser = !eraser;
               });
             },
-            icon: !eraser ? FaIcon(FontAwesomeIcons.eraser) : Icon(Icons.brush),
+            icon: !eraser
+                ? const FaIcon(FontAwesomeIcons.eraser)
+                : const Icon(Icons.brush),
+          ),
+          IconButton(
+            icon: const Icon(Icons.undo_rounded),
+            onPressed: () {
+              setState(() {
+                paintStream.value.removeLast();
+              });
+            },
           ),
           IconButton(
             icon: const Icon(Icons.cancel_outlined),
             onPressed: clearScreen,
-          )
+          ),
         ],
       ),
       body: RepaintBoundary(
