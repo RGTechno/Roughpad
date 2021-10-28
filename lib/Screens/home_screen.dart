@@ -15,6 +15,8 @@ import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:rxdart/rxdart.dart';
 
+enum PadState { scroll, draw }
+
 // ignore: use_key_in_widget_constructors
 class HomeScreen extends StatefulWidget {
   @override
@@ -22,6 +24,9 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  PadState padState = PadState.draw;
+  // ignore: prefer_const_constructors
+  Offset offDiff = Offset(0, 0);
   final List<Color> colors = [
     Colors.red,
     Colors.yellow,
@@ -161,6 +166,15 @@ class _HomeScreenState extends State<HomeScreen> {
                   icon: const Icon(Icons.save_outlined),
                   onPressed: saveImage,
                 ),
+          TextButton(
+            onPressed: () {
+              setState(() {
+                padState =
+                    padState == PadState.draw ? PadState.scroll : PadState.draw;
+              });
+            },
+            child: Text(padState == PadState.draw ? "Scroll" : "Draw"),
+          ),
           IconButton(
             onPressed: () {
               setState(() {
@@ -171,14 +185,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 ? const FaIcon(FontAwesomeIcons.eraser)
                 : const Icon(Icons.brush),
           ),
-          IconButton(
-            icon: const Icon(Icons.undo_rounded),
-            onPressed: () {
-              setState(() {
-                paintStream.value.removeLast();
-              });
-            },
-          ),
+          // IconButton(
+          //   icon: const Icon(Icons.undo_rounded),
+          //   onPressed: () {
+          //     setState(() {
+          //       points.removeLast();
+          //       paintStream.add(points);
+          //     });
+          //   },
+          // ),
           IconButton(
             icon: const Icon(Icons.cancel_outlined),
             onPressed: clearScreen,
@@ -191,50 +206,57 @@ class _HomeScreenState extends State<HomeScreen> {
           onDoubleTap: clearScreen,
           onPanStart: (details) {
             Paint paint = Paint();
-            if (eraser) {
-              paint.color = Colors.white;
-              paint.blendMode = BlendMode.clear;
-              paint.strokeWidth = selectedStrokeWidth;
-              paint.strokeCap = StrokeCap.round;
-            } else {
-              paint.color = selectedColor;
-              paint.strokeWidth = selectedStrokeWidth;
-              paint.strokeCap = StrokeCap.round;
-            }
+            if (padState == PadState.draw) {
+              if (eraser) {
+                paint.color = Colors.white;
+                paint.blendMode = BlendMode.clear;
+                paint.strokeWidth = selectedStrokeWidth;
+                paint.strokeCap = StrokeCap.round;
+              } else {
+                paint.color = selectedColor;
+                paint.strokeWidth = selectedStrokeWidth;
+                paint.strokeCap = StrokeCap.round;
+              }
 
-            points.add(
-              PaintModel(
-                modelOffset: details.localPosition,
-                modelPaint: paint,
-              ),
-            );
+              points.add(
+                PaintModel(
+                  modelOffset: details.localPosition - offDiff,
+                  modelPaint: paint,
+                ),
+              );
+            }
 
             paintStream.add(points);
           },
           onPanUpdate: (details) {
             Paint paint = Paint();
-            if (eraser) {
-              paint.color = Colors.white;
-              paint.blendMode = BlendMode.clear;
-              paint.strokeWidth = selectedStrokeWidth;
-              paint.strokeCap = StrokeCap.round;
+            if (padState == PadState.draw) {
+              if (eraser) {
+                paint.color = Colors.white;
+                paint.blendMode = BlendMode.clear;
+                paint.strokeWidth = selectedStrokeWidth;
+                paint.strokeCap = StrokeCap.round;
+              } else {
+                paint.color = selectedColor;
+                paint.strokeWidth = selectedStrokeWidth;
+                paint.strokeCap = StrokeCap.round;
+              }
+
+              points.add(
+                PaintModel(
+                  modelOffset: details.localPosition - offDiff,
+                  modelPaint: paint,
+                ),
+              );
+              paintStream.add(points);
             } else {
-              paint.color = selectedColor;
-              paint.strokeWidth = selectedStrokeWidth;
-              paint.strokeCap = StrokeCap.round;
+              offDiff += details.delta;
             }
-
-            points.add(
-              PaintModel(
-                modelOffset: details.localPosition,
-                modelPaint: paint,
-              ),
-            );
-
-            paintStream.add(points);
           },
           onPanEnd: (details) {
-            points.add(null);
+            if (padState == PadState.draw) {
+              points.add(null);
+            }
             paintStream.add(points);
           },
           child: Stack(
@@ -254,6 +276,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: CustomPaint(
                         painter: Painter(
                           (snapshot.data ?? []),
+                          offDiff,
                         ),
                       ),
                     );
