@@ -1,8 +1,8 @@
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
-import 'package:custom_painter_roughpad/Widgets/painter.dart';
-import 'package:custom_painter_roughpad/Widgets/paintmodel.dart';
+import 'package:custom_painter_roughpad/widgets/painter.dart';
+import 'package:custom_painter_roughpad/widgets/paint_model.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';

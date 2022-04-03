@@ -1,4 +1,4 @@
-import 'package:custom_painter_roughpad/Screens/home_screen.dart';
+import 'package:custom_painter_roughpad/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 
 void main() {

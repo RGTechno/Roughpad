@@ -1,6 +1,6 @@
 import 'dart:ui';
 
-import 'package:custom_painter_roughpad/Widgets/paintmodel.dart';
+import 'package:custom_painter_roughpad/widgets/paint_model.dart';
 import 'package:flutter/material.dart';
 
 class Painter extends CustomPainter {
