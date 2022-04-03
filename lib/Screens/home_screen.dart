@@ -3,10 +3,8 @@ import 'dart:ui' as ui;
 
 import 'package:custom_painter_roughpad/Widgets/painter.dart';
 import 'package:custom_painter_roughpad/Widgets/paintmodel.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
-import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -66,6 +64,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (!(await Permission.storage.status.isGranted)) {
       await Permission.storage.request();
     }
+    // ignore: unused_local_variable
     final imageSaved = await ImageGallerySaver.saveImage(
       Uint8List.fromList(canvasPng),
       name: "Roughwork",
@@ -328,7 +327,6 @@ class _HomeScreenState extends State<HomeScreen> {
                           pickerColor = colorSelected;
                         });
                       },
-                      showLabel: true,
                       pickerAreaHeightPercent: 0.8,
                     ),
                   ),
